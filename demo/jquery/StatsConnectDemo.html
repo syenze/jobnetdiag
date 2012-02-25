@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+	<head>
+		<title>jsPlumb 1.3.2 - Dynamic Anchors Demo - jQuery</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<link rel="stylesheet" href="../css/jsPlumbDemo.css">
+		<link rel="stylesheet" href="../css/dynamicAnchorsDemo.css">
+	</head>
+	<body onunload="jsPlumb.unload();">
+
+		<div id="demo">
+		</div>
+
+        <div id="result"></div>
+
+	    <div id="debug"></div>
+
+	    <div id="explanation">
+	    	render mode:&nbsp;<a href="#" class="rmode" mode="svg">SVG</a>&nbsp;|&nbsp;<a href="#" class="selected rmode" mode="canvas">Canvas</a>
+	    </div>
+
+	    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.13/jquery-ui.min.js"></script>
+		
+		<!-- support lib for bezier stuff -->
+		<script type="text/javascript" src="../../js/lib/jsBezier-0.2-min.js"></script>
+		<!-- main jsplumb engine -->
+		<script type="text/javascript" src="../../js/1.3.2/jsPlumb-1.3.2-RC1.js"></script>
+		<!-- connectors, endpoint and overlays  -->
+		<script type="text/javascript" src="../../js/1.3.2/jsPlumb-defaults-1.3.2-RC1.js"></script>
+
+		<!-- SVG renderer -->
+		<script type="text/javascript" src="../../js/1.3.2/jsPlumb-renderers-svg-1.3.2-RC1.js"></script>
+		<!-- canvas renderer -->
+		<script type="text/javascript" src="../../js/1.3.2/jsPlumb-renderers-canvas-1.3.2-RC1.js"></script>
+
+		<!-- jquery adapter -->
+		<script type="text/javascript" src="../../js/1.3.2/jquery.jsPlumb-1.3.2-RC1.js"></script>
+		
+		<!-- setting -->
+		<script type="text/javascript" src="../js/etc/setting.js"></script>
+		<!-- job info ジョブ実行情報 設定-->
+		<script type="text/javascript" src="../js/etc/job_info.js"></script>
+		<!-- job wait ジョブ待ち合わせ情報設定 -->
+		<script type="text/javascript" src="../js/etc/job_wait.js"></script>
+
+		<!--  demo code 表示ロジック -->
+		<script type="text/javascript" src="../js/1.3.2/dynamicAnchorsDemo.js"></script>
+		<!--  sample code -->
+		<!-- script type="text/javascript" src="../js/sample/dynamicAnchorsDemo.js"></script-->
+		
+		<!--  demo helper code jquey プラグイン-->
+		<script type="text/javascript" src="../js/1.3.2/demo-helper-jquery.js"></script>		
+
+	</body>
+</html>
