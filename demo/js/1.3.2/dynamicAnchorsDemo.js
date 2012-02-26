@@ -1,8 +1,8 @@
 ;(function() {
 
     // # define 
-    max_x = 64;
-    max_y = 32;
+    max_x = 512;
+    max_y = 256;
 
     //
     def_width  = 350;
@@ -48,79 +48,6 @@
     // position = [ x:(横軸) ] [ y:(縦軸) ] =  mid: (Modelid ) ]
     position = [];
 
-    window.csvload = {
-        loadCSV : function(path) {
-          var httpObj = csvload.createXMLHttpRequest(csvload.handleResult);
-          if (httpObj) {
-            httpObj.open("GET", path, true);
-            httpObj.send(null);
-          }
-        },
-        handleResult : function() {
-          if ((this.readyState == 4) && (this.status == 200)) {
-            var text = csvload.getAjaxFilter()(this.responseText);
-            csvData = csvload.parseCSV(text);
-
-            //ここに取得したcsvの処理を書く。ここではテーブルを表示。
-            var result = "<table>";
-            for (var i = 0; i < csvData.length; i++) {
-              result += "<tr>";
-              for (var j = 0; j < csvData[i].length; j++){
-              result += "<td>";
-              result += csvData[i][j];
-              result += "</td>";
-              }
-              result += "</tr>";
-            }
-            result += "</table>";
-            document.getElementById("result").innerHTML = result;
-          }
-        },
-        parseCSV : function(str) {
-          var CR = String.fromCharCode(13);
-          var LF = String.fromCharCode(10);
-          //ここはCSVの改行コードによってCR,LFを使い分ける必要がある。
-          var lines = str.split(LF);
-          var csvData = new Array();
-
-          for (var i = 0; i < lines.length; i++) {
-            var cells = lines[i].split(",");
-            if( cells.length != 1 ) csvData.push(cells);
-          }
-          return csvData;
-        },
-        createXMLHttpRequest : function(cbFunc) {
-          var XMLhttpObject = null;
-          try {
-            XMLhttpObject = new XMLHttpRequest();
-          } catch(e) {
-            try {
-              XMLhttpObject = new ActiveXObject("Msxml2.XMLHTTP");
-            } catch(e) {
-              try {
-                XMLhttpObject = new ActiveXObject("Microsoft.XMLHTTP");
-              } catch(e) {
-                return null;
-              }
-            }
-          }
-          if (XMLhttpObject) XMLhttpObject.onreadystatechange = cbFunc;
-          return XMLhttpObject;
-        },
-        getAjaxFilter : function() {
-          if (navigator.appVersion.indexOf("KHTML") > -1) {
-            return function(t) {
-              var esc = escape(t);
-              return (esc.indexOf("%u") < 0 && esc.indexOf("%") > -1) ? decodeURIComponent(esc) : t
-            }
-          } else {
-            return function(t) {
-              return t
-            }
-          }
-        },
-    };
-
 	window.jsPlumbDemo = {
         // 初期化処理
 		init : function() {
@@ -130,25 +57,39 @@
 
 			jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
 
-            // csvload.loadCSV( 'http://www33039u.sakura.ne.jp/tfukasaw/jsplumb-demo/demo/static/job_wait.dat' );
-
-
-
             // 自分自身が 接続先のみ、接続先にならないModel つなげる
             // FIXME N x N x N のループ
             for( var n = 0 ; n < jobwait.length; n++ ){
-                console.log( jobwait[n] );
-                jsPlumbDemo.reachModel( jobwait[n].next , jobwait[n].pre );
+                // jsPlumbDemo.reachModel( jobwait[n].next , jobwait[n].pre );
             }
 
             // 他とつながりのないジョブも忘れないように
             // FIXME N のループ
             for( var i = 0 ; i < jobwait.length; i++ ){
-                jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
+                // jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
             }
 
-            for( var i = 0 ; i < jobwait.length; i++ ){
-                jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
+            for( var k = 0 ; k < job_info.length; k++ ){
+                // console.log( job_info[k] );
+
+                if( job_info[k].next != ""){ 
+                    //debug  console.log( job_info[k].next );
+                    nexts = [];
+                    nexts = job_info[k].next.split(',');
+                    for( var l = 0 ; l < nexts.length; l++ ){
+                        jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
+                    }
+                }
+
+                if( job_info[k].pre != ""){ 
+                    // console.log( job_info[k].pre );
+                    pres = [];
+                    pres = job_info[k].pre.split(',');
+                    for( var m = 0 ; m < pres.length; m++ ){
+                        jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
+                    }
+                }
+
             }
         },
 
@@ -212,14 +153,14 @@
 
                     // 接続 の場所なし、接続元との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( pre_pos.x + 1, pre_pos.y );
-                    console.log( list.length + ") new " + next + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + pre + " (" + pre_pos.x + "," + pre_pos.y + ")" );
+                    //debug console.log( list.length + ") new " + next + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + pre + " (" + pre_pos.x + "," + pre_pos.y + ")" );
                     jsPlumbDemo.addModel( next , mmp.x , mmp.y );
 
                 }else if( next_pos ){ // P3. 接続元の場所なし、接続先の場所あり
 
                     // 接続 の場所なし、接続先との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( next_pos.x - 1, next_pos.y );
-                    console.log( list.length + ") new " + pre + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + next + " ( " + next_pos.x + "," + next_pos.y + ")" );
+                    //debug console.log( list.length + ") new " + pre + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + next + " ( " + next_pos.x + "," + next_pos.y + ")" );
                     jsPlumbDemo.addModel( pre , mmp.x , mmp.y );
 
                 }else{ // P4. 接続先の場所なし、接続元の場所なし
@@ -231,19 +172,19 @@
 
                     // 基準点(8, 8) が未設定の場合は、基準点に接続元を設定する
                     if( list.length < 0 ){
-                        console.log( list.length + ") first new " + pre + " findModelPos =  x:" + default_fmp.x + ",y:" + default_fmp.y + "for zero point ."  );
+                        //debug console.log( list.length + ") first new " + pre + " findModelPos =  x:" + default_fmp.x + ",y:" + default_fmp.y + "for zero point ."  );
                         jsPlumbDemo.addModel( pre , default_fmp.x , default_fmp.y );
                         setting_fmp = { x:default_fmp.x , y:default_fmp.y };
 
                     }else{
                         setting_fmp = jsPlumbDemo.findModelPos( default_fmp.x , default_fmp.y );
-                        console.log( list.length + ") new " + pre + " findModelPos =  x:" + setting_fmp.x + ",y:" + setting_fmp.y + " for " + "random (" + default_fmp.x + "," + default_fmp.y + ")" );
+                        //debug console.log( list.length + ") new " + pre + " findModelPos =  x:" + setting_fmp.x + ",y:" + setting_fmp.y + " for " + "random (" + default_fmp.x + "," + default_fmp.y + ")" );
                         jsPlumbDemo.addModel( pre , setting_fmp.x , setting_fmp.y );
                     }
 
                     // 接続先の場所なし、接続元（基準点）との関係から場所を探す ( P2 と同じ )
                     var fmp= jsPlumbDemo.findModelPos( setting_fmp.x , setting_fmp.y );
-                    console.log( list.length + ") new " + next + " findModelPos =  x:" + fmp.x + ",y:" + fmp.y + " for " + pre + " (" + setting_fmp.x + "," + setting_fmp.y + ")" );
+                    //debug console.log( list.length + ") new " + next + " findModelPos =  x:" + fmp.x + ",y:" + fmp.y + " for " + pre + " (" + setting_fmp.x + "," + setting_fmp.y + ")" );
                     jsPlumbDemo.addModel( next , fmp.x , fmp.y );
 
                 }
@@ -311,8 +252,8 @@
 
                     if ( position[mod_x][mod_y] == null && mod_x < max_x && mod_y < max_y &&  mod_x >= 0  && mod_y >= 0 ){
 
-                        console.log( "angle: " + angle + ", radian : " + radian );
-                        console.log( "x : " + def_x + " -> " + mod_x  + "px , y : " + def_y + " -> " + mod_y +  "px" );
+                        //debug console.log( "angle: " + angle + ", radian : " + radian );
+                        //debug console.log( "x : " + def_x + " -> " + mod_x  + "px , y : " + def_y + " -> " + mod_y +  "px" );
 
                         return { x:mod_x, y:mod_y };
                     }
