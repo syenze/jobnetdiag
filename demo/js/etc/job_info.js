@@ -1,7 +1,17 @@
 ;(function() {
 
         job_info = [
-{ id:'model1', cluster_kb:'1', group_no:'1', boot_process:'JobModel', boot_params:'-w=hoge', boot_flg:'1', exec_flg:'1' } ,
+        {
+            id:'model1',
+            cluster_kb:'1',
+            group_no:'1',
+            boot_process:'JobModel',
+            boot_params:'-w=hoge',
+            boot_flg:'1',
+            exec_flg:'1',
+            next:'model2,model3',
+            pre:'NONE'
+        } ,
 { id:'model2', cluster_kb:'1', group_no:'1', boot_process:'JobModel', boot_params:'-w=hoge', boot_flg:'1', exec_flg:'0' } ,
 { id:'model3', cluster_kb:'1', group_no:'1', boot_process:'JobModel', boot_params:'-w=hoge', boot_flg:'1', exec_flg:'0' } ,
 { id:'model4', cluster_kb:'1', group_no:'0', boot_process:'JobModel', boot_params:'-w=hoge', boot_flg:'1', exec_flg:'2' } ,

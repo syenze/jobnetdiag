@@ -137,32 +137,38 @@
             // 自分自身が 接続先のみ、接続先にならないModel つなげる
             // FIXME N x N x N のループ
             for( var n = 0 ; n < jobwait.length; n++ ){
-                jsPlumbDemo.reachModel( jobwait[n] );
+                console.log( jobwait[n] );
+                jsPlumbDemo.reachModel( jobwait[n].next , jobwait[n].pre );
             }
 
             // 他とつながりのないジョブも忘れないように
             // FIXME N のループ
             for( var i = 0 ; i < jobwait.length; i++ ){
-                jsPlumbDemo.connectModel( jobwait[i] );
+                jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
             }
 
+            for( var i = 0 ; i < jobwait.length; i++ ){
+                jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
+            }
         },
 
         // search_id を元に つながりのある ジョブを再帰的につなげていく
-        reachModel : function ( wait ){
+        // param next : 接続先 ( job id )
+        // param pre  : 接続元 ( job id )
+        reachModel : function ( next, pre ){
 
             // とりあえずつなげる
-            jsPlumbDemo.connectModel( wait );
+            jsPlumbDemo.connectModel( next , pre );
 
             // pre の探索
             for( var m = 0; m < jobwait.length; m++ ){
 
-                if( jobwait[m].next == wait.pre && ! jsPlumbDemo.checkModelPos( jobwait[m].pre ) ){
-                    jsPlumbDemo.reachModel( jobwait[m] );
+                if( jobwait[m].next == pre && ! jsPlumbDemo.checkModelPos( jobwait[m].pre ) ){
+                    jsPlumbDemo.reachModel( jobwait[m].next , jobwait[m].pre );
                 }
 
-                if( jobwait[m].pre == wait.pre && ! jsPlumbDemo.checkModelPos( jobwait[m].next ) ){
-                    jsPlumbDemo.reachModel( jobwait[m] );
+                if( jobwait[m].pre == pre && ! jsPlumbDemo.checkModelPos( jobwait[m].next ) ){
+                    jsPlumbDemo.reachModel( jobwait[m].next , jobwait[m].pre );
                 }
 
             }
@@ -170,31 +176,31 @@
             // next の探索 
             for( var l = 0; l < jobwait.length; l++ ){
 
-                if( jobwait[l].pre == wait.next && ! jsPlumbDemo.checkModelPos( jobwait[l].next ) ){
-                    jsPlumbDemo.reachModel( jobwait[l] );
+                if( jobwait[l].pre  == next && ! jsPlumbDemo.checkModelPos( jobwait[l].next ) ){
+                    jsPlumbDemo.reachModel( jobwait[l].next , jobwait[l].pre );
                 }
 
-                if( jobwait[l].next == wait.next && ! jsPlumbDemo.checkModelPos( jobwait[l].pre ) ){
-                    jsPlumbDemo.reachModel( jobwait[l] );
+                if( jobwait[l].next == next && ! jsPlumbDemo.checkModelPos( jobwait[l].pre ) ){
+                    jsPlumbDemo.reachModel( jobwait[l].next , jobwait[l].pre );
                 }
             }
 
         },
 
-        // data ( 接続先、接続元 ) の情報に基づいて、つながりを生成する
-        // data : 
-        connectModel : function ( data ){
+        // data() 
+        // ジョブ接続情報に基づいて、つながりを生成する
+        // param pre : 接続先 ( job id )
+        // param next : 接続元 ( job id )
+        connectModel : function ( next, pre ){
 
-                var obj = data;
+                // var obj = { next:next, pre:pre } ;
 
-
-
-                // console.log( "pre:" + obj.pre + ",next:" + obj.next );
+                // console.log( "pre:" + pre + ",next:" + obj.next );
                 
                 // 2つのモデル ( 接続元 と 接続先 )の関係 から 本 position を設定する
                 
-                var next_pos = jsPlumbDemo.checkModelPos( obj.next )
-                  , pre_pos  = jsPlumbDemo.checkModelPos( obj.pre );
+                var next_pos = jsPlumbDemo.checkModelPos( next )
+                  , pre_pos  = jsPlumbDemo.checkModelPos( pre );
                     
                 // 接続元,接続元の場所を確認
                 if( next_pos && pre_pos ){ // P1. 接続元の場所あり, 接続先の場所あり
@@ -206,15 +212,15 @@
 
                     // 接続 の場所なし、接続元との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( pre_pos.x + 1, pre_pos.y );
-                    console.log( list.length + ") new " + obj.next + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + obj.pre + " (" + pre_pos.x + "," + pre_pos.y + ")" );
-                    jsPlumbDemo.addModel( obj.next , mmp.x , mmp.y );
+                    console.log( list.length + ") new " + next + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + pre + " (" + pre_pos.x + "," + pre_pos.y + ")" );
+                    jsPlumbDemo.addModel( next , mmp.x , mmp.y );
 
                 }else if( next_pos ){ // P3. 接続元の場所なし、接続先の場所あり
 
                     // 接続 の場所なし、接続先との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( next_pos.x - 1, next_pos.y );
-                    console.log( list.length + ") new " + obj.pre + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + obj.next + " ( " + next_pos.x + "," + next_pos.y + ")" );
-                    jsPlumbDemo.addModel( obj.pre , mmp.x , mmp.y );
+                    console.log( list.length + ") new " + pre + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + next + " ( " + next_pos.x + "," + next_pos.y + ")" );
+                    jsPlumbDemo.addModel( pre , mmp.x , mmp.y );
 
                 }else{ // P4. 接続先の場所なし、接続元の場所なし
                     // 接続の場所なし、基準点との関係から場所を探す
@@ -225,27 +231,27 @@
 
                     // 基準点(8, 8) が未設定の場合は、基準点に接続元を設定する
                     if( list.length < 0 ){
-                        console.log( list.length + ") first new " + obj.pre + " findModelPos =  x:" + default_fmp.x + ",y:" + default_fmp.y + "for zero point ."  );
-                        jsPlumbDemo.addModel( obj.pre , default_fmp.x , default_fmp.y );
+                        console.log( list.length + ") first new " + pre + " findModelPos =  x:" + default_fmp.x + ",y:" + default_fmp.y + "for zero point ."  );
+                        jsPlumbDemo.addModel( pre , default_fmp.x , default_fmp.y );
                         setting_fmp = { x:default_fmp.x , y:default_fmp.y };
 
                     }else{
                         setting_fmp = jsPlumbDemo.findModelPos( default_fmp.x , default_fmp.y );
-                        console.log( list.length + ") new " + obj.pre + " findModelPos =  x:" + setting_fmp.x + ",y:" + setting_fmp.y + " for " + "random (" + default_fmp.x + "," + default_fmp.y + ")" );
-                        jsPlumbDemo.addModel( obj.pre , setting_fmp.x , setting_fmp.y );
+                        console.log( list.length + ") new " + pre + " findModelPos =  x:" + setting_fmp.x + ",y:" + setting_fmp.y + " for " + "random (" + default_fmp.x + "," + default_fmp.y + ")" );
+                        jsPlumbDemo.addModel( pre , setting_fmp.x , setting_fmp.y );
                     }
 
                     // 接続先の場所なし、接続元（基準点）との関係から場所を探す ( P2 と同じ )
                     var fmp= jsPlumbDemo.findModelPos( setting_fmp.x , setting_fmp.y );
-                    console.log( list.length + ") new " + obj.next + " findModelPos =  x:" + fmp.x + ",y:" + fmp.y + " for " + obj.pre + " (" + setting_fmp.x + "," + setting_fmp.y + ")" );
-                    jsPlumbDemo.addModel( obj.next , fmp.x , fmp.y );
+                    console.log( list.length + ") new " + next + " findModelPos =  x:" + fmp.x + ",y:" + fmp.y + " for " + pre + " (" + setting_fmp.x + "," + setting_fmp.y + ")" );
+                    jsPlumbDemo.addModel( next , fmp.x , fmp.y );
 
                 }
                 // 既に 本 position が 確定している Model については、変更しない。
 
-                console.log( "connect :" + obj.pre + " -> " + obj.next );
+                console.log( "connect :" + pre + " -> " + next );
                 // Window (DOM) の 接続元 ( pre ) と 接続先 ( next ) を id を指定して 接続する
-                jsPlumb.connect({ source:obj.pre, target:obj.next }, aConnection );
+                jsPlumb.connect({ source:pre, target:next }, aConnection );
 
         },
 
