@@ -1,15 +1,16 @@
 ;(function() {
 
     // # define 
-    max_x = 512;
-    max_y = 256;
+    max_x = 126;
+    max_y = 64;
 
     //
     def_width  = 350;
     def_height = 150;
 
     // 
-    def_depth = 3;
+    def_init_depth = 2;
+    def_click_depth = 3;
 
     // 
     def_plus_angle = 5;
@@ -73,11 +74,9 @@
             for( var k = 0 ; k < job_info.length; k++ ){
                 // console.log( job_info[k] );
 
-                if ( k > 3 ){
-                    // break;
+                if ( job_info[k].pre == "NONE" ){
+                    jsPlumbDemo.initModel(  job_info[k].id , def_init_depth );
                 }
-
-                jsPlumbDemo.initModel(  job_info[k].id , def_depth );
 
             }
 
@@ -418,7 +417,7 @@
         initAnimation : function( elId ){
 
             $("#" + elId).bind('dblclick', function(e, ui) {
-                jsPlumbDemo.initModel( elId , def_depth );
+                jsPlumbDemo.initModel( elId , def_click_depth );
             });
 
         },
