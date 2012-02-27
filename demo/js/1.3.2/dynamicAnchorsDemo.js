@@ -15,6 +15,17 @@
     // 
     def_plus_width = 1;
 
+    // 生成済み Model id  配列
+	list = [];
+
+    // 生成済み Model id  ハッシュ
+    // models = [ ModelID ] = { x:(横軸), y:(縦軸) }
+	models = [];
+
+    // 本 position 確定用 Model 管理 ハッシュ
+    // position = [ x:(横軸) ] [ y:(縦軸) ] =  mid: (Modelid ) ]
+    position = [];
+
     // 
     // 動的アンカー配置設定
     anchors = [[0.2, 0, 0, -1], [1, 0.2, 1, 0], [0.8, 1, 0, 1], [0, 0.8, -1, 0] ],
@@ -41,12 +52,6 @@
         overlays:[ ["Arrow", { location:0.8, width:25, fillStyle:'#ff0000' } ] ]
     };
 
-    // 生成済み Model id  配列
-	list = [];
-
-    // 本 position 確定用 Model 管理 ハッシュ
-    // position = [ x:(横軸) ] [ y:(縦軸) ] =  mid: (Modelid ) ]
-    position = [];
 
 	window.jsPlumbDemo = {
         // 初期化処理
@@ -134,14 +139,14 @@
         // param next : 接続元 ( job id )
         connectModel : function ( next, pre ){
 
-                // var obj = { next:next, pre:pre } ;
-
-                // console.log( "pre:" + pre + ",next:" + obj.next );
-                
                 // 2つのモデル ( 接続元 と 接続先 )の関係 から 本 position を設定する
-                
+                var before = ( new Date() ).getTime();
+
                 var next_pos = jsPlumbDemo.checkModelPos( next )
                   , pre_pos  = jsPlumbDemo.checkModelPos( pre );
+
+                var after = ( new Date() ).getTime();
+                console.log( "checkModelPos" + ":" + ( after -  before ) );
                     
                 // 接続元,接続元の場所を確認
                 if( next_pos && pre_pos ){ // P1. 接続元の場所あり, 接続先の場所あり
@@ -220,6 +225,9 @@
 
         // 接続元 ( or 基準点 ) からの最適な場所を設定する.
         // 設定された場所 ( x , y ) を返す。
+        // param def_x : 基準 x 座標
+        // param def_y : 基準 y 座標
+        // return  ( x : x 座標 , y : y 座標 )
         findModelPos : function ( def_x , def_y ){
 
             // 基準点を設定して置く
@@ -267,22 +275,15 @@
         },
 
         // Model の 配置場所を 返す
-        // FIXME N x N の 計算 
+        // param job_id ( ジョブ ID )
         checkModelPos : function ( model_id ) {
 
-            for ( x = 0; x < max_x ; x++ ){
-
-                for( y = 0; y < max_y; y++ ){
-
-                    if( position[x][y] == model_id ){
-
-                        return {x:x,y:y};
-
-                    }
-                }
+            if( models[model_id] != null ){
+                return models[ model_id ];
             }
 
             return null;
+
         },
 
         // 格納場所のデータ初期化
@@ -364,12 +365,13 @@
 
             // リスト登録
             position[set_x][set_y] = create_id;
+            models[create_id] = { x:set_x , y:set_y }; 
             
 			return {d:d, id:create_id};
         },
 
         // DOM 追加
-        // add_id : オブジェクト
+        // add_id : オブジェクトのジョブID
         // set_x  : オブジェクトの x 座標
         // set_y  : オブジェクトの y 座標
         // return : 配列 ( obj: オブジェクト, id: オブジェクト id )
