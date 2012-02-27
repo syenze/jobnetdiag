@@ -65,6 +65,7 @@
 
 			jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
 
+            var before = ( new Date() ).getTime();
             // すべてのジョブをつなげる
             for( var k = 0 ; k < job_info.length; k++ ){
                 // console.log( job_info[k] );
@@ -88,6 +89,8 @@
                 }
 
             }
+            var after = ( new Date() ).getTime();
+            console.log( "connectModel : " + ( after - before ) );
         },
 
         // search_id を元に つながりのある ジョブを再帰的につなげていく
@@ -130,7 +133,12 @@
         // ジョブがなければ、適切な場所に作成する
         // param next : 接続元 ( job id )
         // param pre : 接続先 ( job id )
+        // return 
         connectModel : function ( next, pre ){
+
+                if( jsPlumbDemo.isExistConnect( pre , next ) ){
+                    return ;
+                }
 
                 // 2つのモデル ( 接続元 と 接続先 )の関係 から 本 position を設定する
                 var next_pos = jsPlumbDemo.checkModelPos( next )
