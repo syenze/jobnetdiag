@@ -27,6 +27,9 @@
     position = [];
 
     // 
+    connect = [];
+
+    // 
     // 動的アンカー配置設定
     anchors = [[0.2, 0, 0, -1], [1, 0.2, 1, 0], [0.8, 1, 0, 1], [0, 0.8, -1, 0] ],
 
@@ -62,18 +65,7 @@
 
 			jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
 
-            // 自分自身が 接続先のみ、接続先にならないModel つなげる
-            // FIXME N x N x N のループ
-            for( var n = 0 ; n < jobwait.length; n++ ){
-                // jsPlumbDemo.reachModel( jobwait[n].next , jobwait[n].pre );
-            }
-
-            // 他とつながりのないジョブも忘れないように
-            // FIXME N のループ
-            for( var i = 0 ; i < jobwait.length; i++ ){
-                // jsPlumbDemo.connectModel( jobwait[i].next , jobwait[i].pre );
-            }
-
+            // すべてのジョブをつなげる
             for( var k = 0 ; k < job_info.length; k++ ){
                 // console.log( job_info[k] );
 
@@ -135,18 +127,14 @@
 
         // data() 
         // ジョブ接続情報に基づいて、つながりを生成する
-        // param pre : 接続先 ( job id )
+        // ジョブがなければ、適切な場所に作成する
         // param next : 接続元 ( job id )
+        // param pre : 接続先 ( job id )
         connectModel : function ( next, pre ){
 
                 // 2つのモデル ( 接続元 と 接続先 )の関係 から 本 position を設定する
-                var before = ( new Date() ).getTime();
-
                 var next_pos = jsPlumbDemo.checkModelPos( next )
                   , pre_pos  = jsPlumbDemo.checkModelPos( pre );
-
-                var after = ( new Date() ).getTime();
-                console.log( "checkModelPos" + ":" + ( after -  before ) );
                     
                 // 接続元,接続元の場所を確認
                 if( next_pos && pre_pos ){ // P1. 接続元の場所あり, 接続先の場所あり
@@ -196,6 +184,10 @@
                 // 既に 本 position が 確定している Model については、変更しない。
 
                 console.log( "connect :" + pre + " -> " + next );
+
+                // ジョブ同士を接続したことを設定する
+                jsPlumbDemo.setConnect( pre , next );
+
                 // Window (DOM) の 接続元 ( pre ) と 接続先 ( next ) を id を指定して 接続する
                 jsPlumb.connect({ source:pre, target:next }, aConnection );
 
@@ -393,6 +385,39 @@
 			list.push(info.id);
 
             return { obj:info.d, id:info.id };
+        },
+
+        // 既に Model が存在するかチェックする
+        // param job_id : ジョブID
+        // return true / false
+        isExistModel : function( job_id ){
+
+            if( list.indexOf( add_id ) > -1 ){
+                return true;
+            }
+
+            return false;
+
+        },
+
+        // 接続が存在するか確認する
+        // return ture / false
+        isExistConnect : function( from , to  ){
+
+            if( connect.indexOf( from + "->" + to ) > -1 ){
+                return true;
+            }
+
+            return false;
+
+        },
+        
+        // つながりを保持する
+        // return void
+        setConnect : function ( from , to ){
+
+            connect.push( from + "->" + to );
+
         }
 	};
 })();
