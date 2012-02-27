@@ -9,6 +9,9 @@
     def_height = 150;
 
     // 
+    def_depth = 3;
+
+    // 
     def_plus_angle = 5;
     def_angle = 0;
 
@@ -70,27 +73,18 @@
             for( var k = 0 ; k < job_info.length; k++ ){
                 // console.log( job_info[k] );
 
-                if( job_info[k].next != ""){ 
-                    //debug  console.log( job_info[k].next );
-                    nexts = [];
-                    nexts = job_info[k].next.split(',');
-                    for( var l = 0 ; l < nexts.length; l++ ){
-                        jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
-                    }
+                if ( k > 3 ){
+                    // break;
                 }
 
-                if( job_info[k].pre != ""){ 
-                    // console.log( job_info[k].pre );
-                    pres = [];
-                    pres = job_info[k].pre.split(',');
-                    for( var m = 0 ; m < pres.length; m++ ){
-                        jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
-                    }
-                }
+                jsPlumbDemo.initModel(  job_info[k].id , def_depth );
 
             }
+
             var after = ( new Date() ).getTime();
             console.log( "connectModel : " + ( after - before ) );
+
+			jsPlumb.bind("dblclick", function(connection, originalEvent) { alert( connection.sourceId + " -> " + connection.targetId); });
         },
 
         // search_id を元に つながりのある ジョブを再帰的につなげていく
@@ -124,6 +118,54 @@
                 if( jobwait[l].next == next && ! jsPlumbDemo.checkModelPos( jobwait[l].pre ) ){
                     jsPlumbDemo.reachModel( jobwait[l].next , jobwait[l].pre );
                 }
+            }
+
+        },
+
+        // initModel 
+        initModel : function ( elId , depth ){
+
+            if( depth <= 0 ){
+                return;
+            }
+
+            for( var k = 0 ; k < job_info.length; k++ ){
+
+                if( job_info[k].id == elId ){
+
+                    // console.log( job_info[k] );
+
+                    if( job_info[k].next != ""){ 
+                        //debug  console.log( job_info[k].next );
+                        nexts = [];
+                        nexts = job_info[k].next.split(',');
+                        for( var l = 0 ; l < nexts.length; l++ ){
+                            jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
+
+                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                jsPlumbDemo.initModel( nexts[l] , depth - 1 );
+                            }
+
+                        }
+                    }
+
+                    if( job_info[k].pre != ""){ 
+                        // console.log( job_info[k].pre );
+                        pres = [];
+                        pres = job_info[k].pre.split(',');
+                        for( var m = 0 ; m < pres.length; m++ ){
+                            jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
+
+                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
+                                jsPlumbDemo.initModel( pres[k] , depth - 1);
+                            }
+                        }
+                    }
+
+                    break;
+
+                }
+
             }
 
         },
@@ -363,11 +405,22 @@
             d.style.left = ( 10 + set_x * def_width ) +  'px'; 
             d.style.top  = ( 10 + set_y * def_height ) +  'px'; 
 
+            // アニメーション追加
+            jsPlumbDemo.initAnimation( create_id );
+
             // リスト登録
             position[set_x][set_y] = create_id;
             models[create_id] = { x:set_x , y:set_y }; 
             
 			return {d:d, id:create_id};
+        },
+
+        initAnimation : function( elId ){
+
+            $("#" + elId).bind('dblclick', function(e, ui) {
+                jsPlumbDemo.initModel( elId , def_depth );
+            });
+
         },
 
         // DOM 追加
@@ -400,7 +453,7 @@
         // return true / false
         isExistModel : function( job_id ){
 
-            if( list.indexOf( add_id ) > -1 ){
+            if( list.indexOf( job_id ) > -1 ){
                 return true;
             }
 
