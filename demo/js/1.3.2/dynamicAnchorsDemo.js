@@ -9,8 +9,9 @@
     def_height = 150;
 
     // 
-    def_init_depth = 2;
+    def_init_depth = 1;
     def_click_depth = 3;
+    def_insert_depth = 1;
 
     // 
     def_plus_angle = 5;
@@ -44,7 +45,7 @@
     connectorStyle = {
         // グラデーション 
         gradient:{stops:[ [0, startColor], [1, endColor] ]},
-        lineWidth:5,
+        lineWidth:2,
         strokeStyle:exampleColor
     },
 
@@ -84,6 +85,24 @@
             console.log( "connectModel : " + ( after - before ) );
 
 			jsPlumb.bind("dblclick", function(connection, originalEvent) { alert( connection.sourceId + " -> " + connection.targetId); });
+
+            console.log( $("#add") );
+            $("#add").bind( "click", function(e, ui) {
+
+                jobs = window.prompt( "input job id ", "" );
+                jlist = jobs.split(',');
+
+                for( var l = 0 ; l < jlist.length; l++ ){
+                    jsPlumbDemo.initModel( jlist[l] , def_insert_depth );
+                }
+
+            });
+
+        },
+        
+        insertModel : function ( ){
+
+
         },
 
         // search_id を元に つながりのある ジョブを再帰的につなげていく
@@ -124,7 +143,10 @@
         // initModel 
         initModel : function ( elId , depth ){
 
-            if( depth <= 0 ){
+            console.log( "depth:" + depth );
+
+            if( depth < 1 ){
+
                 return;
             }
 
@@ -141,7 +163,7 @@
                         for( var l = 0 ; l < nexts.length; l++ ){
                             jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
 
-                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
+                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
                                 jsPlumbDemo.initModel( nexts[l] , depth - 1 );
                             }
 
@@ -149,13 +171,15 @@
                     }
 
                     if( job_info[k].pre != ""){ 
+
                         // console.log( job_info[k].pre );
+
                         pres = [];
                         pres = job_info[k].pre.split(',');
                         for( var m = 0 ; m < pres.length; m++ ){
                             jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
 
-                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
+                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
                                 jsPlumbDemo.initModel( pres[k] , depth - 1);
                             }
                         }
@@ -208,8 +232,8 @@
                 }else{ // P4. 接続先の場所なし、接続元の場所なし
                     // 接続の場所なし、基準点との関係から場所を探す
 
-                    var default_fmp = { x:( max_x / 2 + Math.floor( Math.random() * 10 ) % 10 ) , y: ( max_y / 2 +  Math.floor( Math.random() * 10 ) % 20) };
-                    // var default_fmp = { x:2 , y:2 };
+                    // var default_fmp = { x:( max_x / 2 + Math.floor( Math.random() * 10 ) % 10 ) , y: ( max_y / 2 +  Math.floor( Math.random() * 10 ) % 20) };
+                    var default_fmp = { x:2 , y:4 };
                     var setting_fmp;
 
                     // 基準点(8, 8) が未設定の場合は、基準点に接続元を設定する
@@ -417,8 +441,28 @@
         initAnimation : function( elId ){
 
             $("#" + elId).bind('dblclick', function(e, ui) {
+
+                // 接続モデルの作成
                 jsPlumbDemo.initModel( elId , def_click_depth );
+
+                // 画面内スクロールの移動
+                jsPlumbDemo.smoothScroll( elId , e.pageX, e.pageY );
+
             });
+
+        },
+
+        smoothScroll : function ( elId , x , y ){
+
+                def_x = 1;
+                def_y = 1;
+
+                scrollX = scrollY = 0;
+
+                scrollX = x - ( $(window).width() / 2 );
+                scrollY = y - ( $(window).height() / 2 );
+
+                window.scrollTo( Math.floor( scrollX / def_x ), Math.floor( scrollY / def_y ) );
 
         },
 
