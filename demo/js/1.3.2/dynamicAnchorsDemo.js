@@ -71,22 +71,18 @@
 			jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
 
             var before = ( new Date() ).getTime();
-            // すべてのジョブをつなげる
-            for( var k = 0 ; k < job_info.length; k++ ){
-                // console.log( job_info[k] );
-
-                if ( job_info[k].pre == "NONE" ){
-                    jsPlumbDemo.initModel(  job_info[k].id , def_init_depth );
-                }
-
-            }
+            
+            // 初期接続のみ表示
+            jsPlumbDemo.initModel(  "NONE" , def_init_depth );
 
             var after = ( new Date() ).getTime();
             console.log( "connectModel : " + ( after - before ) );
 
+
+            // connection 接続関係表示
 			jsPlumb.bind("dblclick", function(connection, originalEvent) { alert( connection.sourceId + " -> " + connection.targetId); });
 
-            console.log( $("#add") );
+            // 臨時追加 プロンプト表示
             $("#add").bind( "click", function(e, ui) {
 
                 jobs = window.prompt( "input job id ", "" );
@@ -413,8 +409,8 @@
             d.innerHTML = "(" + list.length + ")" 
             + d.innerHTML 
             + "</br>" + mod.group_no
-            + "</br>" + mod.boot_process;
-            // + "</br>" + mod.boot_params;
+            + "</br>" + mod.boot_process
+            + "</br>" + mod.boot_params;
 
             // div#demo DOM 追加
             var objBody = document.getElementById("demo");
