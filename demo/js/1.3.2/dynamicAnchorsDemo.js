@@ -406,12 +406,12 @@
             // st.className = "label";
             d.appendChild(st);
             
-            d.innerHTML = "(" + list.length + ")" 
+            d.innerHTML = "(g" + mod.group_no + ")" 
             + d.innerHTML 
-            + "</br>" + mod.group_no
             + "</br>" + mod.boot_process
             + "</br>" + mod.boot_params;
 
+            
             // div#demo DOM 追加
             var objBody = document.getElementById("demo");
             objBody.appendChild(d);
@@ -426,6 +426,28 @@
 
             // アニメーション追加
             jsPlumbDemo.initAnimation( create_id );
+       
+            // コンテキストメニューを表示
+            $("#" + create_id ).contextMenu(
+
+                { menu: 'select' , inSpead: 10 , outSpead : 0 },
+                function( action , el , pos ){
+
+                    if ( action == 'del' ){
+                        alert( "削除します" );
+                    }else if( action == 'alldel' ){
+                        alert( "全削除します" );
+                    }else{
+                        console.log( action );
+                        console.log( el );
+                        console.log( pos );
+                    }
+
+                }
+
+             );
+
+            // console.log( $("#" + create_id) );
 
             // リスト登録
             position[set_x][set_y] = create_id;

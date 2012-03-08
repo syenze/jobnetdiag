@@ -5,6 +5,7 @@
 		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 		<link rel="stylesheet" href="../css/jsPlumbDemo.css">
 		<link rel="stylesheet" href="../css/dynamicAnchorsDemo.css">
+        <link rel="stylesheet" href="http://www.h-fj.com/ascii/context_menu/jquery.contextMenu.css">
 	</head>
 	<body onunload="jsPlumb.unload();">
 
@@ -36,6 +37,9 @@
 
 		<!-- jquery adapter -->
 		<script type="text/javascript" src="http://www33039u.sakura.ne.jp/tfukasaw/jsplumb-demo/js/1.3.2/jquery.jsPlumb-1.3.2-RC1.js"></script>
+
+        <!-- context menu -->
+        <script type="text/javascript" src="http://www.h-fj.com/ascii/context_menu/jquery.contextMenu.js"></script>
 		
 		<!-- setting -->
 		<!-- script type="text/javascript" src="../js/etc/setting.js"></script -->
@@ -51,6 +55,12 @@
 		
 		<!--  demo helper code jquey プラグイン-->
 		<script type="text/javascript" src="../js/1.3.2/demo-helper-jquery.js"></script>		
+
+        <ul id="select" class="contextMenu">
+            <li ><a href="#del" >削除</a></li>
+            <li ><a href="#alldel">全削除</a></li>
+            <li ><a href="#cancel">キャンセル</a></li>
+        </ul>
 
 	</body>
 </html>
