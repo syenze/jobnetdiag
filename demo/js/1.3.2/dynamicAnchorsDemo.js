@@ -153,7 +153,7 @@
         // initModel 
         initModel : function ( elId , depth ){
 
-            console.log( "depth:" + depth );
+            // console.log( "depth:" + depth );
 
             if( depth < 1 ){
 
@@ -205,6 +205,7 @@
         // モデルを削除する
         allRemoveModel : function ( elId , depth ){
 
+            console.log( "id:" + elId );
             console.log( "depth:" + depth );
 
             if( depth < 1 ){
@@ -215,28 +216,29 @@
 
                 if( job_info[k].id == elId ){
 
-                    // console.log( job_info[k] );
+                    console.log( job_info[k] );
 
                     if( job_info[k].next != ""){
                         //debug  console.log( job_info[k].next );
                         nexts = [];
                         nexts = job_info[k].next.split(',');
+                        console.log( nexts );
                         for( var l = 0 ; l < nexts.length; l++ ){
 
-                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
-                                next;
+                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                continue;
                             }else{
                                 // 再帰的に対象ファイルをたどって削除していく
                                 jsPlumbDemo.allRemoveModel( nexts[l] , depth - 1 );
                             }
                            
                             // つながりが存在すれば 削除する。
-                            if( jsPlumbDemo.isExistConnect( nexts[l], job_info[k].id ) ){
-                                jsPlumbDemo.removeConnect( nexts[l] , job_info[k].id );
+                            if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
+                                jsPlumbDemo.removeConnect(  job_info[k].id , nexts[l] );
                             }
 
                             //  モデルが存在すれば削除する。
-                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
                                 jsPlumbDemo.removeModel( nexts[l] );
                             }
 
@@ -249,20 +251,21 @@
 
                         pres = [];
                         pres = job_info[k].pre.split(',');
+                        console.log( pres );
                         for( var m = 0 ; m < pres.length; m++ ){
 
-                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
-                                next;
+                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                                continue;
                             }else{
                                 jsPlumbDemo.allRemoveModel( pres[m] , depth - 1);
                             }
 
                             // つながりが存在すれば 削除する。
-                            if( jsPlumbDemo.isExistConnect( job_info[k].id , pres[m]) ){
-                                jsPlumbDemo.removeConnect( job_info[k].id , pres[m] );
+                            if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
+                                jsPlumbDemo.removeConnect(  pres[m] , job_info[k].id );
                             }
     
-                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
                                 jsPlumbDemo.removeModel( pres[m] );
                             }
 
@@ -273,7 +276,7 @@
                     // 
                     if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
                         // 自分自信は削除しない
-                        // jsPlumbDemo.removeModel( pres[m] );
+                        jsPlumbDemo.removeModel( job_info[k].id );
                     }
 
                     break;
@@ -431,6 +434,7 @@
 
         // Model の 配置場所を 返す
         // param job_id ( ジョブ ID )
+        // return { x , y } / null
         checkModelPos : function ( model_id ) {
 
             if( models[model_id] != null ){
@@ -550,9 +554,9 @@
                 function( action , el , pos ){
 
                     if ( action == 'del' ){
-                        alert( "削除します" );
+                        jsPlumbDemo.allRemoveModel( elId , 3);
+
                     }else if( action == 'alldel' ){
-                        alert( "全削除します" );
                     }else{
                         console.log( action );
                         console.log( el );
@@ -608,7 +612,24 @@
 
 
         // DOM 削除
-        removeModel : function ( elId , depth ){
+        // param elId : ジョブID
+        // return : void
+        removeModel : function ( elId ){
+
+            console.log( "delete : " + elId );
+			list.unshift( elId );
+
+            var pos = jsPlumbDemo.checkModelPos( elId );  
+
+            if( pos != null ){
+                position[pos.x][pos.y] = null;
+            }
+
+            models[elId] = null ; 
+
+            jsPlumb.removeAllEndpoints( elId );
+
+            $("#"+ elId).remove();
 
         },
 
@@ -652,6 +673,10 @@
 
         // つながりを削除する。
         removeConnect : function ( from , to ){
+
+            console.log( "delete connect :" + from + " -> " + to );
+
+            connect.unshift( from + "->" + to );
 
         }
 	};
