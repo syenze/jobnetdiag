@@ -79,8 +79,22 @@
             console.log( "connectModel : " + ( after - before ) );
 
 
+            // 画面全体の Event 付与
+            jsPlumbDemo.initGlobalEvent();
+
+        },
+
+        // 画面全体で初期 Event 付与
+        // param : void
+        // return : void
+        initGlobalEvent : function ( ){
+
             // connection 接続関係表示
-			jsPlumb.bind("dblclick", function(connection, originalEvent) { alert( connection.sourceId + " -> " + connection.targetId); });
+            jsPlumb.bind("dblclick", 
+                function(connection, originalEvent) { 
+                    alert( connection.sourceId + " -> " + connection.targetId); 
+                }
+            );
 
             // 臨時追加 プロンプト表示
             $("#add").bind( "click", function(e, ui) {
@@ -159,7 +173,7 @@
                         for( var l = 0 ; l < nexts.length; l++ ){
                             jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
 
-                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
                                 jsPlumbDemo.initModel( nexts[l] , depth - 1 );
                             }
 
@@ -175,10 +189,91 @@
                         for( var m = 0 ; m < pres.length; m++ ){
                             jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
 
-                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
                                 jsPlumbDemo.initModel( pres[k] , depth - 1);
                             }
                         }
+                    }
+
+                    break;
+                }
+
+            }
+
+        },
+
+        // モデルを削除する
+        allRemoveModel : function ( elId , depth ){
+
+            console.log( "depth:" + depth );
+
+            if( depth < 1 ){
+                return;
+            }
+
+            for( var k = 0 ; k < job_info.length; k++ ){
+
+                if( job_info[k].id == elId ){
+
+                    // console.log( job_info[k] );
+
+                    if( job_info[k].next != ""){
+                        //debug  console.log( job_info[k].next );
+                        nexts = [];
+                        nexts = job_info[k].next.split(',');
+                        for( var l = 0 ; l < nexts.length; l++ ){
+
+                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                next;
+                            }else{
+                                // 再帰的に対象ファイルをたどって削除していく
+                                jsPlumbDemo.allRemoveModel( nexts[l] , depth - 1 );
+                            }
+                           
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( nexts[l], job_info[k].id ) ){
+                                jsPlumbDemo.removeConnect( nexts[l] , job_info[k].id );
+                            }
+
+                            //  モデルが存在すれば削除する。
+                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                jsPlumbDemo.removeModel( nexts[l] );
+                            }
+
+                        }
+                    }
+
+                    if( job_info[k].pre != ""){
+
+                        // console.log( job_info[k].pre );
+
+                        pres = [];
+                        pres = job_info[k].pre.split(',');
+                        for( var m = 0 ; m < pres.length; m++ ){
+
+                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
+                                next;
+                            }else{
+                                jsPlumbDemo.allRemoveModel( pres[m] , depth - 1);
+                            }
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( job_info[k].id , pres[m]) ){
+                                jsPlumbDemo.removeConnect( job_info[k].id , pres[m] );
+                            }
+    
+                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                                jsPlumbDemo.removeModel( pres[m] );
+                            }
+
+                        }
+
+                    }
+
+                    // 
+                    if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
+                        // 自分自信は削除しない
+                        // jsPlumbDemo.removeModel( pres[m] );
                     }
 
                     break;
@@ -189,6 +284,8 @@
 
         },
 
+
+
         // data() 
         // ジョブ接続情報に基づいて、つながりを生成する
         // ジョブがなければ、適切な場所に作成する
@@ -197,7 +294,7 @@
         // return 
         connectModel : function ( next, pre ){
 
-                if( jsPlumbDemo.isExistConnect( pre , next ) ){
+                if( ! jsPlumbDemo.isExistConnect( pre , next ) ){
                     return ;
                 }
 
@@ -215,50 +312,47 @@
 
                     // 接続 の場所なし、接続元との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( pre_pos.x + 1, pre_pos.y );
-                    //debug console.log( list.length + ") new " + next + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + pre + " (" + pre_pos.x + "," + pre_pos.y + ")" );
                     jsPlumbDemo.addModel( next , mmp.x , mmp.y );
 
                 }else if( next_pos ){ // P3. 接続元の場所なし、接続先の場所あり
 
                     // 接続 の場所なし、接続先との関係から場所を探す
                     var mmp = jsPlumbDemo.findModelPos( next_pos.x - 1, next_pos.y );
-                    //debug console.log( list.length + ") new " + pre + " findModelPos =  x:" + mmp.x + ",y:" + mmp.y + " for " + next + " ( " + next_pos.x + "," + next_pos.y + ")" );
                     jsPlumbDemo.addModel( pre , mmp.x , mmp.y );
 
                 }else{ // P4. 接続先の場所なし、接続元の場所なし
                     // 接続の場所なし、基準点との関係から場所を探す
 
-                    // var default_fmp = { x:( max_x / 2 + Math.floor( Math.random() * 10 ) % 10 ) , y: ( max_y / 2 +  Math.floor( Math.random() * 10 ) % 20) };
+                    /** 
+                    var default_fmp = { 
+                        x:( max_x / 2 + Math.floor( Math.random() * 10 ) % 10 ) , 
+                        y: ( max_y / 2 +  Math.floor( Math.random() * 10 ) % 20) 
+                    };
+                    **/
                     var default_fmp = { x:2 , y:4 };
                     var setting_fmp;
 
                     // 基準点(8, 8) が未設定の場合は、基準点に接続元を設定する
                     if( list.length < 0 ){
-                        //debug console.log( list.length + ") first new " + pre + " findModelPos =  x:" + default_fmp.x + ",y:" + default_fmp.y + "for zero point ."  );
                         jsPlumbDemo.addModel( pre , default_fmp.x , default_fmp.y );
                         setting_fmp = { x:default_fmp.x , y:default_fmp.y };
 
                     }else{
                         setting_fmp = jsPlumbDemo.findModelPos( default_fmp.x , default_fmp.y );
-                        //debug console.log( list.length + ") new " + pre + " findModelPos =  x:" + setting_fmp.x + ",y:" + setting_fmp.y + " for " + "random (" + default_fmp.x + "," + default_fmp.y + ")" );
                         jsPlumbDemo.addModel( pre , setting_fmp.x , setting_fmp.y );
                     }
 
                     // 接続先の場所なし、接続元（基準点）との関係から場所を探す ( P2 と同じ )
                     var fmp= jsPlumbDemo.findModelPos( setting_fmp.x , setting_fmp.y );
-                    //debug console.log( list.length + ") new " + next + " findModelPos =  x:" + fmp.x + ",y:" + fmp.y + " for " + pre + " (" + setting_fmp.x + "," + setting_fmp.y + ")" );
                     jsPlumbDemo.addModel( next , fmp.x , fmp.y );
 
                 }
                 // 既に 本 position が 確定している Model については、変更しない。
 
-                console.log( "connect :" + pre + " -> " + next );
 
                 // ジョブ同士を接続したことを設定する
                 jsPlumbDemo.setConnect( pre , next );
 
-                // Window (DOM) の 接続元 ( pre ) と 接続先 ( next ) を id を指定して 接続する
-                jsPlumb.connect({ source:pre, target:next }, aConnection );
 
         },
 
@@ -424,11 +518,33 @@
             d.style.left = ( 10 + set_x * def_width ) +  'px'; 
             d.style.top  = ( 10 + set_y * def_height ) +  'px'; 
 
-            // アニメーション追加
+            // Event追加
             jsPlumbDemo.initAnimation( create_id );
        
+            // console.log( $("#" + create_id) );
+
+            // リスト登録
+            position[set_x][set_y] = create_id;
+            models[create_id] = { x:set_x , y:set_y }; 
+            
+			return {d:d, id:create_id};
+        },
+
+        // モデル Event 初期設定
+        initAnimation : function( elId ){
+
+            $("#" + elId).bind('dblclick', function(e, ui) {
+
+                // 接続モデルの作成
+                jsPlumbDemo.initModel( elId , def_click_depth );
+
+                // 画面内スクロールの移動
+                jsPlumbDemo.smoothScroll( elId , e.pageX, e.pageY );
+
+            });
+
             // コンテキストメニューを表示
-            $("#" + create_id ).contextMenu(
+            $("#" + elId ).contextMenu(
 
                 { menu: 'select' , inSpead: 10 , outSpead : 0 },
                 function( action , el , pos ){
@@ -447,29 +563,10 @@
 
              );
 
-            // console.log( $("#" + create_id) );
-
-            // リスト登録
-            position[set_x][set_y] = create_id;
-            models[create_id] = { x:set_x , y:set_y }; 
-            
-			return {d:d, id:create_id};
         },
 
-        initAnimation : function( elId ){
 
-            $("#" + elId).bind('dblclick', function(e, ui) {
-
-                // 接続モデルの作成
-                jsPlumbDemo.initModel( elId , def_click_depth );
-
-                // 画面内スクロールの移動
-                jsPlumbDemo.smoothScroll( elId , e.pageX, e.pageY );
-
-            });
-
-        },
-
+        // オブジェクト を中央に移動
         smoothScroll : function ( elId , x , y ){
 
                 def_x = 1;
@@ -509,16 +606,22 @@
             return { obj:info.d, id:info.id };
         },
 
+
+        // DOM 削除
+        removeModel : function ( elId , depth ){
+
+        },
+
         // 既に Model が存在するかチェックする
         // param job_id : ジョブID
         // return true / false
         isExistModel : function( job_id ){
 
             if( list.indexOf( job_id ) > -1 ){
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
 
         },
 
@@ -527,18 +630,28 @@
         isExistConnect : function( from , to  ){
 
             if( connect.indexOf( from + "->" + to ) > -1 ){
-                return true;
+                return false;
             }
 
-            return false;
+            return true;
 
         },
         
         // つながりを保持する
+        // モデルどおしの　コネクションを貼る
         // return void
         setConnect : function ( from , to ){
 
+            console.log( "connect :" + from + " -> " + to );
             connect.push( from + "->" + to );
+
+            // Window (DOM) の 接続元 ( pre ) と 接続先 ( next ) を id を指定して 接続する
+            jsPlumb.connect({ source:from, target:to }, aConnection );
+
+        },
+
+        // つながりを削除する。
+        removeConnect : function ( from , to ){
 
         }
 	};
