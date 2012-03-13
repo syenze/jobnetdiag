@@ -33,6 +33,8 @@
 
     // 
     connect = [];
+    //
+    delete_list = [];
 
     // 
     // 動的アンカー配置設定
@@ -61,14 +63,14 @@
     };
 
 
-	window.jsPlumbDemo = {
+    window.jsPlumbDemo = {
         // 初期化処理
-		init : function() {
+            init : function() {
 
             // Model 配置場所 position の初期化
             jsPlumbDemo.initModelPos();
 
-			jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
+            jsPlumb.DefaultDragOptions = { cursor: 'pointer', zIndex:2000 };
 
             var before = ( new Date() ).getTime();
             
@@ -151,12 +153,13 @@
         },
 
         // initModel 
+        // return void
         initModel : function ( elId , depth ){
 
-            // console.log( "depth:" + depth );
+            console.log( "init depth:" + depth );
+            // console.log( "itni list:" + list );
 
             if( depth < 1 ){
-
                 return;
             }
 
@@ -164,34 +167,29 @@
 
                 if( job_info[k].id == elId ){
 
-                    // console.log( job_info[k] );
+                    console.log( "init job_id:" +  job_info[k].id );
 
                     if( job_info[k].next != ""){ 
                         //debug  console.log( job_info[k].next );
                         nexts = [];
                         nexts = job_info[k].next.split(',');
                         for( var l = 0 ; l < nexts.length; l++ ){
+                            // モデルの作成 / コネクションの作成
                             jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
-
-                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
-                                jsPlumbDemo.initModel( nexts[l] , depth - 1 );
-                            }
+                            jsPlumbDemo.initModel( nexts[l] , depth - 1 );
 
                         }
                     }
 
                     if( job_info[k].pre != ""){ 
 
-                        // console.log( job_info[k].pre );
+                        // console.log( job_info[k].pre ); 
 
                         pres = [];
                         pres = job_info[k].pre.split(',');
                         for( var m = 0 ; m < pres.length; m++ ){
                             jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
-
-                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
-                                jsPlumbDemo.initModel( pres[k] , depth - 1);
-                            }
+                            jsPlumbDemo.initModel( pres[k] , depth - 1);
                         }
                     }
 
@@ -207,66 +205,62 @@
 
             console.log( "id:" + elId );
             console.log( "depth:" + depth );
+    
 
-            if( depth < 1 ){
+            if( depth < -100 ){
                 return;
+            }
+
+            if( jsPlumbDemo.isDeletedModel( elId ) ){
+                delete_list.push( elId );
+            }else{
+                return ;
             }
 
             for( var k = 0 ; k < job_info.length; k++ ){
 
                 if( job_info[k].id == elId ){
 
-                    console.log( job_info[k] );
+                    // console.log( job_info[k] );
 
                     if( job_info[k].next != ""){
                         //debug  console.log( job_info[k].next );
                         nexts = [];
                         nexts = job_info[k].next.split(',');
-                        console.log( nexts );
+                        // console.log( nexts );
                         for( var l = 0 ; l < nexts.length; l++ ){
 
-                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
-                                continue;
-                            }else{
-                                // 再帰的に対象ファイルをたどって削除していく
-                                jsPlumbDemo.allRemoveModel( nexts[l] , depth - 1 );
-                            }
-                           
                             // つながりが存在すれば 削除する。
                             if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
                                 jsPlumbDemo.removeConnect(  job_info[k].id , nexts[l] );
                             }
 
-                            //  モデルが存在すれば削除する。
-                            if( ! jsPlumbDemo.isExistModel( nexts[l] ) ){
-                                jsPlumbDemo.removeModel( nexts[l] );
+                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                // 再帰的に対象ファイルをたどって削除していく
+                                jsPlumbDemo.allRemoveModel( nexts[l] , depth - 1 );
                             }
+                           
 
                         }
                     }
 
                     if( job_info[k].pre != ""){
 
+
                         // console.log( job_info[k].pre );
 
                         pres = [];
                         pres = job_info[k].pre.split(',');
-                        console.log( pres );
+                        // console.log( pres );
                         for( var m = 0 ; m < pres.length; m++ ){
-
-                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
-                                continue;
-                            }else{
-                                jsPlumbDemo.allRemoveModel( pres[m] , depth - 1);
-                            }
 
                             // つながりが存在すれば 削除する。
                             if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
                                 jsPlumbDemo.removeConnect(  pres[m] , job_info[k].id );
                             }
-    
-                            if( ! jsPlumbDemo.isExistModel( pres[m] ) ){
-                                jsPlumbDemo.removeModel( pres[m] );
+
+                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                                jsPlumbDemo.allRemoveModel( pres[m] , depth - 1);
                             }
 
                         }
@@ -277,6 +271,8 @@
                     if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
                         // 自分自信は削除しない
                         jsPlumbDemo.removeModel( job_info[k].id );
+                        jsPlumbDemo.removeDeleteList( job_info[k].id );
+
                     }
 
                     break;
@@ -286,6 +282,121 @@
             }
 
         },
+
+        // モデルを削除する
+        removeNextModel : function ( elId , depth ){
+
+            console.log( "id:" + elId );
+            console.log( "depth:" + depth );
+
+            if( depth < -100 ){
+                return;
+            }
+
+            if( jsPlumbDemo.isDeletedModel( elId ) ){
+                delete_list.push( elId );
+            }else{
+                return ;
+            }
+
+            for( var k = 0 ; k < job_info.length; k++ ){
+
+                if( job_info[k].id == elId ){
+
+                    // console.log( job_info[k] );
+
+                    if( job_info[k].next != ""){
+                        //debug  console.log( job_info[k].next );
+                        nexts = [];
+                        nexts = job_info[k].next.split(',');
+                        // console.log( nexts );
+                        for( var l = 0 ; l < nexts.length; l++ ){
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
+                                jsPlumbDemo.removeConnect(  job_info[k].id , nexts[l] );
+                            }
+
+                            if( jsPlumbDemo.isExistModel( nexts[l] ) ){
+                                // 再帰的に対象ファイルをたどって削除していく
+                                jsPlumbDemo.removeNextModel( nexts[l] , depth - 1 );
+                            }
+
+                        }
+                    }
+
+                    // 
+                    if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
+                        // 自分自信は削除しない
+                        jsPlumbDemo.removeModel( job_info[k].id );
+                        jsPlumbDemo.removeDeleteList( job_info[k].id );
+                    }
+
+                    break;
+
+                }
+
+            }
+
+        },
+
+        // モデルを削除する
+        removePreModel : function ( elId , depth ){
+
+            console.log( "id:" + elId );
+            console.log( "depth:" + depth );
+
+            if( depth < -100 ){
+                return;
+            }
+
+            if( jsPlumbDemo.isDeletedModel( elId ) ){
+                delete_list.push( elId );
+            }else{
+                return ;
+            }
+
+            for( var k = 0 ; k < job_info.length; k++ ){
+
+                if( job_info[k].id == elId ){
+
+                    if( job_info[k].pre != ""){
+
+                        // console.log( job_info[k].pre );
+
+                        pres = [];
+                        pres = job_info[k].pre.split(',');
+                        // console.log( pres );
+                        for( var m = 0 ; m < pres.length; m++ ){
+
+                            if( jsPlumbDemo.isExistModel( pres[m] ) ){
+                                jsPlumbDemo.removePreModel( pres[m] , depth - 1);
+                            }
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
+                                jsPlumbDemo.removeConnect(  pres[m] , job_info[k].id );
+                            }
+
+                        }
+
+                    }
+
+                    // 
+                    if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
+                        // 自分自信は削除しない
+                        jsPlumbDemo.removeModel( job_info[k].id );
+                        jsPlumbDemo.removeDeleteList( job_info[k].id );
+                    }
+
+                    break;
+
+                }
+
+            }
+        },
+
+
 
 
 
@@ -297,7 +408,9 @@
         // return 
         connectModel : function ( next, pre ){
 
-                if( ! jsPlumbDemo.isExistConnect( pre , next ) ){
+                if( jsPlumbDemo.isExistConnect( pre , next ) ){
+                    console.log( "exixt connect : " + pre + "," + next );
+                    console.log( connect );
                     return ;
                 }
 
@@ -413,8 +526,8 @@
                     // P1. 設定点 
                     radian = ( angle + def_angle ) * 3.14 / 180;
 
-                    mod_x = def_x + Math.floor( width * Math.cos( radian ) );
-                    mod_y = def_y + Math.floor( width * Math.sin( radian ) );
+                    mod_x = Math.abs ( def_x + Math.floor( width * Math.cos( radian ) ) );
+                    mod_y = Math.abs ( def_y + Math.floor( width * Math.sin( radian ) ) );
 
                     if ( position[mod_x][mod_y] == null && mod_x < max_x && mod_y < max_y &&  mod_x >= 0  && mod_y >= 0 ){
 
@@ -554,9 +667,17 @@
                 function( action , el , pos ){
 
                     if ( action == 'del' ){
-                        jsPlumbDemo.allRemoveModel( elId , 3);
-
+                        delete_list = [];
+                        jsPlumbDemo.removeModel( elId );
+                    }else if( action == 'nextdel' ){
+                        delete_list = [];
+                        jsPlumbDemo.removeNextModel( elId , 3);
+                    }else if( action == 'predel' ){
+                        delete_list = [];
+                        jsPlumbDemo.removePreModel( elId , 3);
                     }else if( action == 'alldel' ){
+                        delete_list = [];
+                        jsPlumbDemo.allRemoveModel( elId , 3);
                     }else{
                         console.log( action );
                         console.log( el );
@@ -628,17 +749,36 @@
             models[elId] = null ; 
 
             jsPlumb.removeAllEndpoints( elId );
+            // jsPlumb.detachAll( elId );
+            // jsPlumb.hide( elId );
 
             $("#"+ elId).remove();
+
+        },
+        
+        // 削除済みか　あるいは 削除対象になっているか
+        isDeletedModel : function ( job_id ){
+
+            if( ! jsPlumbDemo.isExistModel( job_id )){
+                return false;
+            }
+           
+            // 削除対象に追加済み
+            if( $.inArray( job_id , delete_list ) != -1){
+                return false;
+            }
+
+            // 未削除であり、且つ 削除対象にもふくまれていない
+            return true;
 
         },
 
         // 既に Model が存在するかチェックする
         // param job_id : ジョブID
-        // return true / false
+        // return bootlean :true / false
         isExistModel : function( job_id ){
 
-            if( list.indexOf( job_id ) > -1 ){
+            if( $.inArray( job_id , list ) == -1){
                 return false;
             }
 
@@ -650,7 +790,7 @@
         // return ture / false
         isExistConnect : function( from , to  ){
 
-            if( connect.indexOf( from + "->" + to ) > -1 ){
+            if( $.inArray( from + "->" + to , connect ) == -1 ){
                 return false;
             }
 
@@ -678,6 +818,13 @@
 
             connect.unshift( from + "->" + to );
 
+        },
+
+        removeDeleteList : function ( elId ){
+           
+            delete_list.unshift ( elId );
+
         }
+
 	};
 })();
