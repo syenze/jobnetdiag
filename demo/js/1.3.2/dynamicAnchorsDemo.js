@@ -117,41 +117,6 @@
 
         },
 
-        // search_id を元に つながりのある ジョブを再帰的につなげていく
-        // param next : 接続先 ( job id )
-        // param pre  : 接続元 ( job id )
-        reachModel : function ( next, pre ){
-
-            // とりあえずつなげる
-            jsPlumbDemo.connectModel( next , pre );
-
-            // pre の探索
-            for( var m = 0; m < jobwait.length; m++ ){
-
-                if( jobwait[m].next == pre && ! jsPlumbDemo.checkModelPos( jobwait[m].pre ) ){
-                    jsPlumbDemo.reachModel( jobwait[m].next , jobwait[m].pre );
-                }
-
-                if( jobwait[m].pre == pre && ! jsPlumbDemo.checkModelPos( jobwait[m].next ) ){
-                    jsPlumbDemo.reachModel( jobwait[m].next , jobwait[m].pre );
-                }
-
-            }
-
-            // next の探索 
-            for( var l = 0; l < jobwait.length; l++ ){
-
-                if( jobwait[l].pre  == next && ! jsPlumbDemo.checkModelPos( jobwait[l].next ) ){
-                    jsPlumbDemo.reachModel( jobwait[l].next , jobwait[l].pre );
-                }
-
-                if( jobwait[l].next == next && ! jsPlumbDemo.checkModelPos( jobwait[l].pre ) ){
-                    jsPlumbDemo.reachModel( jobwait[l].next , jobwait[l].pre );
-                }
-            }
-
-        },
-
         // initModel 
         // return void
         initModel : function ( elId , depth ){
