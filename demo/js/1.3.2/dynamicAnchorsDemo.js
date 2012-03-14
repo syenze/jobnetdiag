@@ -325,6 +325,24 @@
                         }
                     }
 
+                    if( job_info[k].pre != ""){
+
+                        // console.log( job_info[k].pre );
+
+                        pres = [];
+                        pres = job_info[k].pre.split(',');
+                        // console.log( pres );
+                        for( var m = 0 ; m < pres.length; m++ ){
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
+                                jsPlumbDemo.removeConnect(  pres[m] , job_info[k].id );
+                            }
+
+                        }
+
+                    }
+
                     // 
                     if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
                         // 自分自信は削除しない
@@ -359,6 +377,21 @@
             for( var k = 0 ; k < job_info.length; k++ ){
 
                 if( job_info[k].id == elId ){
+
+                    if( job_info[k].next != ""){
+                        //debug  console.log( job_info[k].next );
+                        nexts = [];
+                        nexts = job_info[k].next.split(',');
+                        // console.log( nexts );
+                        for( var l = 0 ; l < nexts.length; l++ ){
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
+                                jsPlumbDemo.removeConnect(  job_info[k].id , nexts[l] );
+                            }
+
+                        }
+                    }
 
                     if( job_info[k].pre != ""){
 
@@ -738,7 +771,8 @@
         removeModel : function ( elId ){
 
             console.log( "delete : " + elId );
-			list.unshift( elId );
+            list_item = $.inArray( elId , list ); 
+			list.splice( list_item , 1 );
 
             var pos = jsPlumbDemo.checkModelPos( elId );  
 
@@ -816,13 +850,15 @@
 
             console.log( "delete connect :" + from + " -> " + to );
 
-            connect.unshift( from + "->" + to );
+            connect_item = $.inArray( from + "->" + to , connect ); 
+            connect.splice( connect_item , 1 );
 
         },
 
         removeDeleteList : function ( elId ){
            
-            delete_list.unshift ( elId );
+            delete_item = $.inArray( elId , delete_list ); 
+            delete_list.splice( delete_item , 1 );
 
         }
 
