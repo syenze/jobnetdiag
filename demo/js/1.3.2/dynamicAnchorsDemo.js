@@ -133,7 +133,7 @@
 
                 if( job_info[k].id == elId ){
 
-                    console.log( "init job_id:" +  job_info[k].id );
+                    // console.log( "init job_id:" +  job_info[k].id );
 
                     if( job_info[k].next != ""){ 
                         //debug  console.log( job_info[k].next );
