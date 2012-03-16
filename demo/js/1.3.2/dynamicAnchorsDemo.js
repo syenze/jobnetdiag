@@ -101,8 +101,8 @@
             // 臨時追加 プロンプト表示
             $("#add").bind( "click", function(e, ui) {
 
-                jobs = window.prompt( "input job id ", "" );
-                jlist = jobs.split(',');
+                var jobs = window.prompt( "input job id ", "" );
+                var jlist = jobs.split(',');
 
                 for( var l = 0 ; l < jlist.length; l++ ){
                     jsPlumbDemo.initModel( jlist[l] , def_insert_depth );
@@ -119,12 +119,13 @@
 
         // initModel 
         // return void
-        initModel : function ( elId , depth ){
-
-            console.log( "init depth:" + depth );
+        initModel : function ( elId , p_depth ){
+            
+            // console.log( "init depth:" + p_depth );
+            var v_depth = p_depth;
             // console.log( "itni list:" + list );
 
-            if( depth < 1 ){
+            if( v_depth < 1 ){
                 return;
             }
 
@@ -136,12 +137,12 @@
 
                     if( job_info[k].next != ""){ 
                         //debug  console.log( job_info[k].next );
-                        nexts = [];
+                        var nexts = [];
                         nexts = job_info[k].next.split(',');
                         for( var l = 0 ; l < nexts.length; l++ ){
                             // モデルの作成 / コネクションの作成
                             jsPlumbDemo.connectModel( nexts[l], job_info[k].id );
-                            jsPlumbDemo.initModel( nexts[l] , depth - 1 );
+                            jsPlumbDemo.initModel( nexts[l] , v_depth - 1 );
 
                         }
                     }
@@ -150,11 +151,11 @@
 
                         // console.log( job_info[k].pre ); 
 
-                        pres = [];
+                        var pres = [];
                         pres = job_info[k].pre.split(',');
                         for( var m = 0 ; m < pres.length; m++ ){
                             jsPlumbDemo.connectModel( job_info[k].id, pres[m]  );
-                            jsPlumbDemo.initModel( pres[k] , depth - 1);
+                            jsPlumbDemo.initModel( pres[k] , v_depth - 1);
                         }
                     }
 
@@ -169,12 +170,8 @@
         allRemoveModel : function ( elId , depth ){
 
             console.log( "id:" + elId );
-            console.log( "depth:" + depth );
+            // console.log( "depth:" + depth );
     
-
-            if( depth < -100 ){
-                return;
-            }
 
             if( jsPlumbDemo.isDeletedModel( elId ) ){
                 delete_list.push( elId );
@@ -190,10 +187,13 @@
 
                     if( job_info[k].next != ""){
                         //debug  console.log( job_info[k].next );
-                        nexts = [];
+                        var nexts = [];
                         nexts = job_info[k].next.split(',');
                         // console.log( nexts );
+
                         for( var l = 0 ; l < nexts.length; l++ ){
+
+                            //debug  console.log( jsPlumbDemo.outputLen( depth ) + "n)start" + nexts[l] );
 
                             // つながりが存在すれば 削除する。
                             if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
@@ -205,6 +205,7 @@
                                 jsPlumbDemo.allRemoveModel( nexts[l] , depth - 1 );
                             }
                            
+                            // console.log( jsPlumbDemo.outputLen( depth ) + "n)end" + nexts[l] );
 
                         }
                     }
@@ -214,10 +215,12 @@
 
                         // console.log( job_info[k].pre );
 
-                        pres = [];
+                        var pres = [];
                         pres = job_info[k].pre.split(',');
                         // console.log( pres );
                         for( var m = 0 ; m < pres.length; m++ ){
+
+                            // console.log( jsPlumbDemo.outputLen( depth ) + "p)start" + pres[m] );
 
                             // つながりが存在すれば 削除する。
                             if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
@@ -227,6 +230,8 @@
                             if( jsPlumbDemo.isExistModel( pres[m] ) ){
                                 jsPlumbDemo.allRemoveModel( pres[m] , depth - 1);
                             }
+
+                            // console.log( jsPlumbDemo.outputLen( depth ) + "p)end" + pres[m] );
 
                         }
 
@@ -251,12 +256,7 @@
         // モデルを削除する
         removeNextModel : function ( elId , depth ){
 
-            console.log( "id:" + elId );
-            console.log( "depth:" + depth );
-
-            if( depth < -100 ){
-                return;
-            }
+            // console.log( "id:" + elId );
 
             if( jsPlumbDemo.isDeletedModel( elId ) ){
                 delete_list.push( elId );
@@ -272,7 +272,7 @@
 
                     if( job_info[k].next != ""){
                         //debug  console.log( job_info[k].next );
-                        nexts = [];
+                        var nexts = [];
                         nexts = job_info[k].next.split(',');
                         // console.log( nexts );
                         for( var l = 0 ; l < nexts.length; l++ ){
@@ -294,7 +294,7 @@
 
                         // console.log( job_info[k].pre );
 
-                        pres = [];
+                        var pres = [];
                         pres = job_info[k].pre.split(',');
                         // console.log( pres );
                         for( var m = 0 ; m < pres.length; m++ ){
@@ -327,11 +327,6 @@
         removePreModel : function ( elId , depth ){
 
             console.log( "id:" + elId );
-            console.log( "depth:" + depth );
-
-            if( depth < -100 ){
-                return;
-            }
 
             if( jsPlumbDemo.isDeletedModel( elId ) ){
                 delete_list.push( elId );
@@ -345,7 +340,7 @@
 
                     if( job_info[k].next != ""){
                         //debug  console.log( job_info[k].next );
-                        nexts = [];
+                        var nexts = [];
                         nexts = job_info[k].next.split(',');
                         // console.log( nexts );
                         for( var l = 0 ; l < nexts.length; l++ ){
@@ -362,7 +357,7 @@
 
                         // console.log( job_info[k].pre );
 
-                        pres = [];
+                        var pres = [];
                         pres = job_info[k].pre.split(',');
                         // console.log( pres );
                         for( var m = 0 ; m < pres.length; m++ ){
@@ -394,11 +389,68 @@
             }
         },
 
+        // モデルを削除する
+        removeSingleModel : function ( elId , depth ){
 
+            console.log( "id:" + elId );
 
+            if( jsPlumbDemo.isDeletedModel( elId ) ){
+                delete_list.push( elId );
+            }else{
+                return ;
+            }
 
+            for( var k = 0 ; k < job_info.length; k++ ){
 
-        // data() 
+                if( job_info[k].id == elId ){
+
+                    if( job_info[k].next != ""){
+                        //debug  console.log( job_info[k].next );
+                        var nexts = [];
+                        nexts = job_info[k].next.split(',');
+                        // console.log( nexts );
+                        for( var l = 0 ; l < nexts.length; l++ ){
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( job_info[k].id , nexts[l] ) ){
+                                jsPlumbDemo.removeConnect(  job_info[k].id , nexts[l] );
+                            }
+
+                        }
+                    }
+
+                    if( job_info[k].pre != ""){
+
+                        // console.log( job_info[k].pre );
+
+                        var pres = [];
+                        pres = job_info[k].pre.split(',');
+                        // console.log( pres );
+                        for( var m = 0 ; m < pres.length; m++ ){
+
+                            // つながりが存在すれば 削除する。
+                            if( jsPlumbDemo.isExistConnect( pres[m] , job_info[k].id ) ){
+                                jsPlumbDemo.removeConnect(  pres[m] , job_info[k].id );
+                            }
+
+                        }
+
+                    }
+
+                    // 
+                    if( jsPlumbDemo.isExistModel( job_info[k].id ) ){
+                        // 自分自信は削除しない
+                        jsPlumbDemo.removeModel( job_info[k].id );
+                        jsPlumbDemo.removeDeleteList( job_info[k].id );
+                    }
+
+                    break;
+
+                }
+
+            }
+        },
+
         // ジョブ接続情報に基づいて、つながりを生成する
         // ジョブがなければ、適切な場所に作成する
         // param next : 接続元 ( job id )
@@ -407,8 +459,6 @@
         connectModel : function ( next, pre ){
 
                 if( jsPlumbDemo.isExistConnect( pre , next ) ){
-                    console.log( "exixt connect : " + pre + "," + next );
-                    console.log( connect );
                     return ;
                 }
 
@@ -666,7 +716,7 @@
 
                     if ( action == 'del' ){
                         delete_list = [];
-                        jsPlumbDemo.removeModel( elId );
+                        jsPlumbDemo.removeSingleModel( elId , 3);
                     }else if( action == 'nextdel' ){
                         delete_list = [];
                         jsPlumbDemo.removeNextModel( elId , 3);
@@ -677,9 +727,7 @@
                         delete_list = [];
                         jsPlumbDemo.allRemoveModel( elId , 3);
                     }else{
-                        console.log( action );
-                        console.log( el );
-                        console.log( pos );
+
                     }
 
                 }
@@ -802,7 +850,7 @@
         // return void
         setConnect : function ( from , to ){
 
-            console.log( "connect :" + from + " -> " + to );
+            // console.log( "connect :" + from + " -> " + to );
             connect.push( from + "->" + to );
 
             // Window (DOM) の 接続元 ( pre ) と 接続先 ( next ) を id を指定して 接続する
