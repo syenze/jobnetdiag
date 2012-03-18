@@ -1,0 +1,87 @@
+.window { 
+border:1px solid #346789;
+box-shadow: 2px 2px 19px #aaa;
+   -o-box-shadow: 2px 2px 19px #aaa;
+   -webkit-box-shadow: 2px 2px 19px #aaa;
+   -moz-box-shadow: 2px 2px 19px #aaa;
+-moz-border-radius:0.5em;
+border-radius:0.5em;
+opacity:0.8;
+filter:alpha(opacity=80);
+width:12em; height:6em;
+line-height:1em;
+text-align:center;
+z-index:20; position:absolute;
+color:black;
+font-family:helvetica;padding:0.5em;
+font-size:0.9em;}
+.window:hover {
+border:1px solid #123456;
+box-shadow: 2px 2px 19px #444;
+   -o-box-shadow: 2px 2px 19px #444;
+   -webkit-box-shadow: 2px 2px 19px #444;
+   -moz-box-shadow: 2px 2px 19px #444;
+    opacity:0.6;
+filter:alpha(opacity=60);
+
+}
+.clon {
+border:1px solid #ff0000;
+}
+.cloff {
+border:1px solid #346789;
+}
+
+.fin {
+background-color:#eeeeef;
+}
+
+.ready {
+background-color:#1E90FF;
+}
+
+.run {
+background-color:#008080;
+}
+
+.error {
+background-color:#FA8072;
+}
+
+.window .label {
+width:16em; height:6em;
+}
+
+._jsPlumb_connector { z-index:4; }
+._jsPlumb_endpoint { z-index:5; }
+.hl { border:3px solid red; }
+#debug { position:absolute; background-color:black; color:red; z-index:5000 }
+
+
+#suggest {
+    position: absolute;
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCFF;
+    font-size: 90%;
+    width: 200px;
+}
+#suggest div {
+    display: block;
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+#suggest div.select{ /* キー上下で選択した場合のスタイル */
+    color: #FFFFFF;
+    background-color: #3366FF;
+}
+#suggest div.over{ /* マウスオーバ時のスタイル */
+    background-color: #99CCFF;
+}
+
+#explanation {
+    position:fixed; 
+    top:10px; 
+    left:10px;
+}
+

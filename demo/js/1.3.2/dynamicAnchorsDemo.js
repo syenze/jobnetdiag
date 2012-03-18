@@ -75,7 +75,7 @@
             var before = ( new Date() ).getTime();
             
             // 初期接続のみ表示
-            jsPlumbDemo.initModel(  "NONE" , def_init_depth );
+            jsPlumbDemo.initModel( "NONE" , def_init_depth );
 
             var after = ( new Date() ).getTime();
             console.log( "connectModel : " + ( after - before ) );
@@ -98,17 +98,7 @@
                 }
             );
 
-            // 臨時追加 プロンプト表示
-            $("#add").bind( "click", function(e, ui) {
-
-                var jobs = window.prompt( "input job id ", "" );
-                var jlist = jobs.split(',');
-
-                for( var l = 0 ; l < jlist.length; l++ ){
-                    jsPlumbDemo.initModel( jlist[l] , def_insert_depth );
-                }
-
-            });
+            jsPlumbDemo.startSuggest();
 
         },
         
@@ -873,6 +863,49 @@
             delete_item = $.inArray( elId , delete_list ); 
             delete_list.splice( delete_item , 1 );
 
+        },
+
+        startSuggest : function () {
+            
+            var suggestList = [];
+
+            for( var k = 0 ; k < job_info.length; k++ ){
+                if( ! jsPlumbDemo.isExistModel( job_info[k].id ) ){ 
+                    suggestList.push( job_info[k].id );
+                }
+            }
+            
+            var test = new Suggest.LocalMulti(
+                "text",    // 入力のエレメントID
+                "suggest", // 補完候補を表示するエリアのID
+                suggestList,      // 補完候補の検索対象となる配列
+                {
+                    dispMax: 10,
+                    interval: 1000,
+                    highlight: true
+                    }); // オプション
+
+        },
+
+        submitCheck : function (e){
+            if (!e) var e = window.event;
+
+            if(e.keyCode == 13){
+
+                var jobs = "";
+                
+                jobs = $("#text").val();
+                
+                var jlist = jobs.split(' ');
+
+                for( var l = 0 ; l < jlist.length; l++ ){
+                    jsPlumbDemo.initModel( jlist[l] , def_insert_depth );
+                }
+
+                // ジョブ追加後は フォームを空にする
+                $("#text").val("");
+
+            }
         }
 
 	};
