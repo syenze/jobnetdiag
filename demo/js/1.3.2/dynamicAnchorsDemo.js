@@ -672,9 +672,7 @@
             var suggestList = [];
 
             for( var k = 0 ; k < job_info.length; k++ ){
-                if( ! jsPlumbDemo.isExistModel( job_info[k].id ) ){ 
-                    suggestList.push( job_info[k].id );
-                }
+                suggestList.push( job_info[k].id );
             }
             
             var test = new Suggest.LocalMulti(
